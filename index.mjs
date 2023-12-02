@@ -1,5 +1,4 @@
 import { google } from 'googleapis'
-import { searchconsole } from '@googleapis/searchconsole'
 import express from 'express'
 import dotenv from 'dotenv'
 
@@ -44,7 +43,7 @@ app.get('/oauth2callback', async (req, res) => {
 
 app.get('/data', async (req, res) => {
     // https://developers.google.com/webmaster-tools/v1/searchanalytics/query#request-body
-    const data = await searchconsole({version: 'v1', auth: oauth2Client}).searchanalytics.query({
+    const data = await google.searchconsole({version: 'v1', auth: oauth2Client}).searchanalytics.query({
         siteUrl: "sc-domain:syntackle.live",
         requestBody: {
             startDate: "2022-02-15",
