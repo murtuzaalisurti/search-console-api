@@ -22,6 +22,17 @@ google.options({
     auth: oauth2Client
 })
 
+async function getSearchData(domain) {
+    return await google.searchconsole({ version: 'v1', auth: oauth2Client }).searchanalytics.query({
+        siteUrl: `sc-domain:${domain}`,
+        requestBody: {
+            startDate: "2022-02-15",
+            endDate: `${new Date().getFullYear()}-${('0' + (new Date().getMonth() + 1)).slice(-2)}-${new Date().getDate()}`,
+            aggregationType: 'byProperty'
+        },
+    })
+}
+
 app.get('/', (req, res) => {
     res.redirect('/auth')
 })
@@ -55,23 +66,9 @@ app.get('/data', async (req, res) => {
     // https://developers.google.com/webmaster-tools/v1/searchanalytics/query#request-body
 
     try {
-        const dataOfSyntackleDotCom = await google.searchconsole({ version: 'v1', auth: oauth2Client }).searchanalytics.query({
-            siteUrl: `sc-domain:${SEARCH_DOMAIN.com}`,
-            requestBody: {
-                startDate: "2022-02-15",
-                endDate: `${new Date().getFullYear()}-${('0' + (new Date().getMonth() + 1)).slice(-2)}-${new Date().getDate()}`,
-                aggregationType: 'byProperty'
-            },
-        })
-    
-        const dataOfSyntackleDotLive = await google.searchconsole({ version: 'v1', auth: oauth2Client }).searchanalytics.query({
-            siteUrl: `sc-domain:${SEARCH_DOMAIN.live}`,
-            requestBody: {
-                startDate: "2022-02-15",
-                endDate: `${new Date().getFullYear()}-${('0' + (new Date().getMonth() + 1)).slice(-2)}-${new Date().getDate()}`,
-                aggregationType: 'byProperty'
-            },
-        })
+        const dataOfSyntackleDotCom = await getSearchData(SEARCH_DOMAIN.com)
+        const dataOfSyntackleDotLive = await getSearchData(SEARCH_DOMAIN.live)
+
         res.status(200).json(
             {
                 [SEARCH_DOMAIN.com]: {
@@ -117,11 +114,3 @@ app.get('/data', async (req, res) => {
 })
 
 app.listen(3000, () => console.log("listening..."))
-
-/**
- * ! how to use
- * SIMPLIFIED: hit localhost:3000
- * ? 1. Call /auth from REST client
- * ? 2. Copy the authURL from response and go to browser and hit the url. A success message should be shown
- * ? 3. Call /data endpoint and get the data (by property) - more on https://developers.google.com/webmaster-tools/v1/searchanalytics/query#request-body
- */
