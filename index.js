@@ -1,21 +1,23 @@
 import { google } from 'googleapis'
 import express from 'express'
 import dotenv from 'dotenv'
+import {
+    PORT,
+    BASE_URL,
+    SEARCH_DOMAIN,
+    REDIRECT_URI_SLUG,
+    ANALYTICS_START_DATE,
+    ANALYTICS_END_DATE
+} from './lib/constants.js'
 
 dotenv.config()
 const app = express()
-
-const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : ''
-const SEARCH_DOMAIN = {
-    live: 'syntackle.live',
-    com: 'syntackle.com'
-}
 
 // https://console.cloud.google.com/home/dashboard?project=august-gantry-351310
 const oauth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID, // client_id
     process.env.CLIENT_SECRET, // client secret
-    `${BASE_URL}/oauth2callback` // redirect uri
+    `${BASE_URL(process.env.NODE_ENV)}/${REDIRECT_URI_SLUG}` // redirect uri
 )
 
 google.options({
@@ -26,8 +28,8 @@ async function getSearchData(domain) {
     return await google.searchconsole({ version: 'v1', auth: oauth2Client }).searchanalytics.query({
         siteUrl: `sc-domain:${domain}`,
         requestBody: {
-            startDate: "2022-02-15",
-            endDate: `${new Date().getFullYear()}-${('0' + (new Date().getMonth() + 1)).slice(-2)}-${new Date().getDate()}`,
+            startDate: ANALYTICS_START_DATE,
+            endDate: ANALYTICS_END_DATE,
             aggregationType: 'byProperty'
         },
     })
@@ -50,7 +52,7 @@ app.get('/auth', (req, res) => {
     }
 })
 
-app.get('/oauth2callback', async (req, res) => {
+app.get(`/${REDIRECT_URI_SLUG}`, async (req, res) => {
     try {
         const { tokens } = await oauth2Client.getToken(req.query.code)
         oauth2Client.setCredentials(tokens)
@@ -113,4 +115,4 @@ app.get('/data', async (req, res) => {
     }
 })
 
-app.listen(3000, () => console.log("listening..."))
+app.listen(PORT, () => console.log(`listening... on ${PORT}`))
