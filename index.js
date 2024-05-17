@@ -22,6 +22,9 @@ const oauth2Client = new google.auth.OAuth2(
     `${BASE_URL(process.env.NODE_ENV)}/${REDIRECT_URI_SLUG}` // redirect uri
 )
 
+/**
+ * ? using OAuth 2.0
+ */
 google.options({
     auth: oauth2Client
 })
@@ -43,6 +46,9 @@ app.get('/', (req, res) => {
 
 app.get('/auth', (req, res) => {
     try {
+        /**
+         * ? generating auth url for getting a token for the readonly scope
+         */
         const authUrl = oauth2Client.generateAuthUrl({
             scope: 'https://www.googleapis.com/auth/webmasters.readonly',
         })
@@ -54,6 +60,9 @@ app.get('/auth', (req, res) => {
     }
 })
 
+/**
+ * ? the authUrl will redirect to this endpoint after successfully getting consent from the oauth sign in page
+ */
 app.get(`/${REDIRECT_URI_SLUG}`, async (req, res) => {
     try {
         const { tokens } = await oauth2Client.getToken(req.query.code)
@@ -97,7 +106,7 @@ app.get('/data', async (req, res) => {
                         ]
                     }
                 },
-                "Aggregated": Object.assign(
+                ["Aggregated"]: Object.assign(
                     {},
                     ...Object.keys(dataOfSyntackleDotCom.data.rows[0]).map(key => {
                         if (key !== 'position') {
