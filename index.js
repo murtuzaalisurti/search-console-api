@@ -1,14 +1,16 @@
 import { google } from 'googleapis'
 import express from 'express'
 import dotenv from 'dotenv'
-import {
+import constants from './lib/constants.js'
+
+const {
     PORT,
     BASE_URL,
     SEARCH_DOMAIN,
     REDIRECT_URI_SLUG,
     ANALYTICS_START_DATE,
     ANALYTICS_END_DATE
-} from './lib/constants.js'
+} = constants;
 
 dotenv.config()
 const app = express()
