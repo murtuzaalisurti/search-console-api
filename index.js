@@ -40,12 +40,24 @@ async function getSearchData(domain) {
     })
 }
 
+async function tryThis(callback, res) {
+    try {
+        await callback()
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            status: 500,
+            error: error.message,
+        })
+    }
+}
+
 app.get('/', (req, res) => {
     res.redirect('/auth')
 })
 
 app.get('/auth', (req, res) => {
-    try {
+    tryThis(() => {
         /**
          * ? generating auth url for getting a token for the readonly scope
          */
@@ -53,32 +65,23 @@ app.get('/auth', (req, res) => {
             scope: 'https://www.googleapis.com/auth/webmasters.readonly',
         })
         res.redirect(authUrl)
-    } catch (error) {
-        res.status(500).json({ 
-            error: error.message
-        })
-    }
+    }, res)
 })
 
 /**
  * ? the authUrl will redirect to this endpoint after successfully getting consent from the oauth sign in page
  */
 app.get(`/${REDIRECT_URI_SLUG}`, async (req, res) => {
-    try {
+    await tryThis(async () => {
         const { tokens } = await oauth2Client.getToken(req.query.code)
         oauth2Client.setCredentials(tokens)
         res.redirect('/data')
-    } catch (error) {
-        res.status(500).json({ 
-            error: error.message
-        })
-    }
+    }, res)
 })
 
 app.get('/data', async (req, res) => {
     // https://developers.google.com/webmaster-tools/v1/searchanalytics/query#request-body
-
-    try {
+    tryThis(async () => {
         const dataOfSyntackleDotCom = await getSearchData(SEARCH_DOMAIN.com)
         const dataOfSyntackleDotLive = await getSearchData(SEARCH_DOMAIN.live)
 
@@ -119,11 +122,7 @@ app.get('/data', async (req, res) => {
                 )
             }
         )
-    } catch (error) {
-        res.status(500).json({ 
-            error: error.message
-        })
-    }
+    }, res)
 })
 
 app.listen(PORT, () => console.log(`listening... on ${PORT}`))
