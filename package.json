@@ -12,10 +12,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@googleapis/docs": "^3.0.2",
+    "@googleapis/docs": "^3.3.0",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "googleapis": "^140.0.1"
+    "express": "^4.21.0",
+    "googleapis": "^144.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
