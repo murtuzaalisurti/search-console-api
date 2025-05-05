@@ -83,7 +83,6 @@ app.get('/data', async (req, res) => {
     // https://developers.google.com/webmaster-tools/v1/searchanalytics/query#request-body
     tryThis(async () => {
         const dataOfSyntackleDotCom = await getSearchData(SEARCH_DOMAIN.com)
-        const dataOfSyntackleDotLive = await getSearchData(SEARCH_DOMAIN.live)
 
         res.status(200).json(
             {
@@ -98,23 +97,23 @@ app.get('/data', async (req, res) => {
                         ]
                     }
                 },
-                [SEARCH_DOMAIN.live]: {
-                    domain: SEARCH_DOMAIN.live,
-                    data: {
-                        params: {
-                            ...dataOfSyntackleDotLive.config.data,
-                        },
-                        metrics: [
-                            ...dataOfSyntackleDotLive.data.rows
-                        ]
-                    }
-                },
                 ["Aggregated"]: Object.assign(
                     {},
                     ...Object.keys(dataOfSyntackleDotCom.data.rows[0]).map(key => {
                         if (key !== 'position') {
+                            let keyValue = null;
+
+                            if (dataOfSyntackleDotCom) {
+                                keyValue = dataOfSyntackleDotCom.data.rows[0][key]
+                            }
+
+                            // append the keyvalue to other domains if needed in the future
+                            // if (dataOfSyntackleDotLive) {
+                            //     keyValue += dataOfSyntackleDotLive.data.rows[0][key]
+                            // }
+
                             return {
-                                [key]: dataOfSyntackleDotCom.data.rows[0][key] + dataOfSyntackleDotLive.data.rows[0][key]
+                                [key]: keyValue
                             }
                         }
                         return null
